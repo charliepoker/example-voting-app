@@ -1,0 +1,54 @@
+networks:
+  vote:
+    driver: bridge
+
+volumes:
+  db-data: 
+
+
+services:
+  vote:
+    image: 8060633493/vote:v1.0
+    ports:
+      - 80
+    networks:
+      - vote
+    depends_on: 
+      - redis
+    
+  redis: 
+    image: redis:7.2-alpine
+    networks: 
+      - vote
+
+  worker: 
+    image: 8060633493/worker:v1.0
+    networks: 
+      - vote
+    depends_on: 
+      - redis
+      - db
+ 
+  db: 
+    image: postgres:12-alpine
+    networks: 
+      - vote
+    environment:
+      - POSTGRES_HOST_AUTH_METHOD=trust
+    volumes:
+       - "db-data:/var/lib/postgresql/data"
+   
+  results: 
+    image: 8060633493/result:v1.0
+    ports:
+      - 80
+    depends_on: 
+      - db
+    networks: 
+      - vote
+
+
+
+
+
+
